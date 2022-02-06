@@ -1,11 +1,19 @@
+"""
+TODOs
+ - get cookies from textfile
+ - get username from commandline
+"""
+
 #%%
-from os import remove
+# IMPORTS AND FUNCTIONS
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from time import sleep
 from selenium.webdriver.common.keys import Keys
 import sys
+
+LOAD_IN = 12    # instagram loads up 12 accounts per time in the pop-up
 
 def is_username(uname, illegal_words):
     predicate = ' ' not in uname and uname.isascii() and uname.islower() and uname not in illegal_words
@@ -20,14 +28,7 @@ def close_popup():
     close_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[1]/div/div[2]/button')
     close_button.click()
 
-"""
-TODOs
- - get cookies from textfile
- - get follower and following amount
- - scroll methods
- - popups need to close
-"""
-
+# %%
 # OPENING INSTAGRAM PAGE
 
 username = 't0ffif33'           # sys.argv[1]
@@ -56,37 +57,39 @@ sleep(1)
 followers_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[2]/a')
 followers_button.click()
 
-# %%
-# TESTING GROUND
+sleep(1)
+pop_up_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[2]/ul/div/li[1]/div/div[3]/button')
+ActionChains(browser).move_to_element_with_offset(to_element=pop_up_button, xoffset=-30, yoffset=0).click().perform()
 
-# find remove button
-# click on it with offset to focus on div
-# press 'end' X times
-
-remove_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[2]/ul/div/li[1]/div/div[3]/button')
-ActionChains(browser).move_to_element_with_offset(to_element=remove_button, xoffset=-30, yoffset=0).click().perform()
-
-# %%
-for _ in range(12):
+for _ in range(num_followers//LOAD_IN):
     ActionChains(browser).key_down(Keys.END).perform()
     sleep(2)
 
-# %%
-
-sleep(1)
 followers_element = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[2]')
 illegal_words = ['Remove', 'Follow', '·']
 followers = extract_usernames(followers_element, illegal_words)
 
+close_popup()
+
 #%%
 # GETTING FOLLOWING
 
-# following_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[3]/a')
-# following_button.click()
+following_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[3]/a')
+following_button.click()
+
+sleep(1)
+pop_up_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[3]/ul/div/li[1]/div/div[3]/button')
+ActionChains(browser).move_to_element_with_offset(to_element=pop_up_button, xoffset=-30, yoffset=0).click().perform()
+
+for _ in range(num_following//LOAD_IN):
+    ActionChains(browser).key_down(Keys.END).perform()
+    sleep(2)
 
 following_element = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[3]')
 illegal_words = ['Following', 'Verified']
 following = extract_usernames(following_element, illegal_words)
+
+close_popup()
 
 # %%
 # CHECKING DATA
