@@ -1,4 +1,5 @@
 #%%
+from os import remove
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -15,6 +16,18 @@ def extract_usernames(element, illegal_words):
     l = [f for f in l if is_username(f, illegal_words)]
     return l
 
+def close_popup():
+    close_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[1]/div/div[2]/button')
+    close_button.click()
+
+"""
+TODOs
+ - get cookies from textfile
+ - get follower and following amount
+ - scroll methods
+ - popups need to close
+"""
+
 # OPENING INSTAGRAM PAGE
 
 username = 't0ffif33'           # sys.argv[1]
@@ -27,12 +40,38 @@ for c in cookies:
 
 browser.get(f'http://instagram.com/{username}/')
 
+# %%
+# GETTING STATS
+
+follower_amount = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[2]/a/span')
+num_followers = int(follower_amount.text)
+
+following_amount = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[3]/a/span')
+num_following = int(following_amount.text)
+
 # %% 
 # GETTING FOLLOWERS
 
 sleep(1)
 followers_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[2]/a')
 followers_button.click()
+
+# %%
+# TESTING GROUND
+
+# find remove button
+# click on it with offset to focus on div
+# press 'end' X times
+
+remove_button = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[2]/ul/div/li[1]/div/div[3]/button')
+ActionChains(browser).move_to_element_with_offset(to_element=remove_button, xoffset=-30, yoffset=0).click().perform()
+
+# %%
+for _ in range(12):
+    ActionChains(browser).key_down(Keys.END).perform()
+    sleep(2)
+
+# %%
 
 sleep(1)
 followers_element = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[2]')
@@ -42,8 +81,8 @@ followers = extract_usernames(followers_element, illegal_words)
 #%%
 # GETTING FOLLOWING
 
-following_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[3]/a')
-following_button.click()
+# following_button = browser.find_element(By.XPATH, '/html/body/div[1]/section/main/div/header/section/ul/li[3]/a')
+# following_button.click()
 
 following_element = browser.find_element(By.XPATH, '/html/body/div[6]/div/div/div/div[3]')
 illegal_words = ['Following', 'Verified']
